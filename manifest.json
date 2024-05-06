@@ -1,0 +1,37 @@
+{
+  "name": "Tradier Pro",
+  "version": "0.2.0",
+  "description": "Tradier.com Bot",
+  "permissions": ["storage", "tabs","webNavigation"],
+  "host_permissions": ["https://*.tradier.com/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://*.tradier.com/*"],
+      "js": ["contentScript.js"]
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "assets/bookmark.png",
+        "assets/play.png",
+        "assets/delete.png",
+        "assets/save.png"
+      ],
+      "matches": ["https://*.tradier.com/*"]
+    }
+  ],
+  "action": {
+    "default_icon": {
+      "16": "assets/ext-icon.png",
+      "24": "assets/ext-icon.png",
+      "32": "assets/ext-icon.png"
+    },
+    "default_title": "Tradier Pro",
+    "default_popup": "popup.html"
+  },
+  "manifest_version": 3
+}
