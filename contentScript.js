@@ -91,39 +91,28 @@ const performMagic = async () => {
     stockInputTag.value = data.StackValue.toString();
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Select the dropdown button
+    // ============================== Select Next Account =====================================
     const dropdownButton = document.getElementById("headlessui-menu-button-5");
-
     // If the dropdown button is not found, exit
     if (!dropdownButton) {
       alert("Dropdown button not found.");
       break;
     } else {
-      // Simulate a click event on the dropdown button to open the dropdown
       dropdownButton.dispatchEvent(new MouseEvent("click"));
 
-      // Wait for a short delay to ensure the dropdown is fully loaded
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       // Get the selected item
       const selectedItem = document.querySelector("button.bg-gray-200");
-
-      // If the selected item is not found, exit
       if (!selectedItem) {
         console.log("Selected item not found.");
         break;
       }
-
-      // Log the name of the selected item
       console.log("Selected item:", selectedItem.innerText);
-
-      // If the selected item is the last item ("AH-21"), exit the loop
       if (selectedItem.innerText === "AH-21") {
         console.log("Last item reached: AH-21");
         break;
       }
-
-      // Simulate a click event on the next item in the dropdown
       const nextItem = selectedItem.nextElementSibling;
       if (nextItem) {
         nextItem.click();
@@ -132,15 +121,9 @@ const performMagic = async () => {
         break;
       }
 
-      // Wait for a short delay before selecting the next item
       await new Promise((resolve) => setTimeout(resolve, 3000));
     }
 
-    // Continue with the rest of your actions
-    // set account value
-    // accountSelect.selectedIndex = i;
-    // accountSelect.dispatchEvent(changeEvent);
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
     
     // set index of selected action
     const actionTag = document.getElementsByName("side")[0];
