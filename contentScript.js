@@ -1,4 +1,8 @@
 (async ()=>{
+
+  function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
   const getData = async ()=>{
   const data  = {
     StackValue : "not selected",
@@ -76,17 +80,20 @@ const performMagic = async () => {
   });
 
 
-  await new Promise((resolve) => setTimeout(resolve, 1000));
+  await sleep(1000)
 
     var tradeTicket = document.querySelector('[data-automation="trade_ticket"]');
     if (!tradeTicket){
         // If not visible, perform actions to toggle it
         console.log('Trade ticket is not visible on the page, toggling it...');
+  
+        await sleep(1000)
+        
         var toggleButton = document.querySelector('button[data-automation="toggle_trade_ticket_button"]');
         if (toggleButton) {
             toggleButton.click();
             console.log('Trade ticket toggled');
-            await new Promise((resolve) => setTimeout(resolve, 1000));
+            await sleep(1000)
             tradeTicket = document.querySelector('[data-automation="trade_ticket"]');
         } else {
             console.log('Toggle button not found');
@@ -102,6 +109,7 @@ const performMagic = async () => {
     const allInputs = document.getElementsByName("trade_module_symbol_search");
     const stockInputTag = allInputs[0];
 
+
     // To Simulate key press in Symbol field
     const typeStockInput = (stockInputTag, text) => {
       // stockInputTag.dispatchEvent(new Event('focus'));
@@ -109,22 +117,27 @@ const performMagic = async () => {
       stockInputTag.dispatchEvent(new Event('input', { bubbles: true }));
       stockInputTag.dispatchEvent(new Event('change', { bubbles: true }));
     };
-
     typeStockInput(stockInputTag, data.StackValue.toString());
+    console.log('=== Stock Input');
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    await sleep(1000)
     // Press Search button to get the Symbol
     const searchButton = document.getElementsByClassName("button-outline muted icon-only rounded-l-none rounded-r-md border-l-0 px-4 py-2")[0]
     searchButton.click()
+    console.log('=== Search Button');
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    await sleep(1000)
 
      // ============================== Add Values and Submit =====================================
     // set index of selected action
     const actionTag = document.getElementsByName("side")[0];
     actionTag.selectedIndex = data.actionIndex;
     actionTag.dispatchEvent(changeEvent);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log('=== Action Tag');
+
+    await sleep(1000)
 
     // set Trade Quantity
     const tradeQuantityInputElement = document.getElementsByName("quantity")[0];
@@ -138,13 +151,16 @@ const performMagic = async () => {
     };
 
     typeQuantity(tradeQuantityInputElement, data.tradeQuantity.toString());
+    console.log('=== Trade Quantity');
 
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    // await sleep(1000)
 
     const orderType = document.getElementsByName("type")[0];
     orderType.selectedIndex = data.orderTradeIndex;
     orderType.dispatchEvent(changeEvent);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log('=== Order Type');
+
+
 
     if (data.limitValue !== "not selected") {
       const limitTag = document.getElementsByName("price")[0];
@@ -159,8 +175,10 @@ const performMagic = async () => {
       };
 
       typeLimitPrice(limitTag, data.limitValue.toString());
+      console.log('=== Limit Price');
 
-      // await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // await sleep(1000)
     }
 
     if (data.tradeStopValue !== "not selected") {
@@ -175,26 +193,18 @@ const performMagic = async () => {
       };
 
       typeStopPrice(tradeStopTag, data.tradeStopValue.toString());
+      console.log('=== Stop Price');
+
     }
     const tradeDuration = document.getElementsByName("duration")[0];
     tradeDuration.value = data.duration;
     tradeDuration.dispatchEvent(changeEvent);
+    console.log('=== Trade Duration');
 
-    // await new Promise((resolve) => setTimeout(resolve, 1000));
-    const preview_button = document.querySelector(
-      'button[data-automation="trade_preview_button"]'
-    );
-  
-    if(preview_button){
-      preview_button.dispatchEvent(clickEvent);
-      preview_button.click();
-    }
-    
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+
     try {
-      const order_buttons = document.querySelector(
-        'button[data-automation="trade_submit_button"]'
-      );
+      const order_buttons = document.querySelector('button[data-automation="trade_submit_button"]');
       
       await chrome.storage.sync.set({ data })
       console.log("Counter Updated");
@@ -203,10 +213,11 @@ const performMagic = async () => {
       order_buttons.click();
       console.log("=== Order Placed ===")
       
-    
-    
-    await new Promise((resolve) => setTimeout(resolve, 1500));   
-    
+    await new Promise((resolve) => setTimeout(resolve, 1500));
+
+  }catch {
+    console.log("Error occurred while clicking submit button.");
+  }
     
       // ============================== Select Next Account =====================================
     var dropdownButton = document.getElementById("headlessui-menu-button-5");
@@ -216,17 +227,17 @@ const performMagic = async () => {
       await new Promise((resolve) => setTimeout(resolve, 2000));   
       dropdownButton = document.getElementById("headlessui-menu-button-5");
 
-    } 
+    }
     if (dropdownButton) {
       dropdownButton.dispatchEvent(new MouseEvent("click"));
 
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await sleep(1000)
 
       // Get the selected item
       var selectedItem = document.querySelector("button.bg-gray-200");
       if (!selectedItem) {
         console.log("Selected item not found.");
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await sleep(1000)
         selectedItem = document.querySelector("button.bg-gray-200");
       }
       if(selectedItem){
@@ -235,24 +246,20 @@ const performMagic = async () => {
       const nextItem = selectedItem.nextElementSibling;
       if (nextItem) {
         nextItem.click();
-        await new Promise((resolve) => setTimeout(resolve, 2500));   
+   
 
       } else {
         // console.log("");
         await chrome.storage.sync.clear(function() {
           console.log("Next item not found. Traded: " + data.totalTradesApplied + " accounts.")
-          stop();
         alert("Next item not found. Traded: " + data.totalTradesApplied + " accounts.")
-        // document.getElementById("stopprocess").click()
-        })
+        stop();
+      })
         
       }
     }
     }
 
-    } catch {
-      console.log("Error occurred while clicking submit button.");
-    }
     
   } else {
     if (!tradeTicket){
@@ -262,7 +269,7 @@ const performMagic = async () => {
     if (toggleButton) {
         toggleButton.click();
         console.log('Trade ticket toggled');
-        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await sleep(1000)
     } else {
         console.log('Toggle button not found');
     }
@@ -289,7 +296,7 @@ chrome.runtime.onMessage.addListener(async(message, sender, sendResponse) => {
 function stop(){
   chrome.runtime.sendMessage({action: "stopProcess"}, function(response) {
     console.log(response);
-    
+    // document.getElementById("stopprocess").click()
   });
 }
 

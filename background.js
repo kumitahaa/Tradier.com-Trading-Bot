@@ -18,14 +18,16 @@ let isExecuting = false;
 
 const startExecutionLoop = async () => {
   if (!isExecuting) {
+
     isExecuting = true; 
     while (isExecuting) {
-  
-      const activeTab = await getActiveTabURL();
-      await chrome.tabs.sendMessage(activeTab.id, { action: "performMagic" });
-
-      await new Promise(resolve => setTimeout(resolve, 5000)); 
+        const activeTab = await getActiveTabURL();
+        await chrome.tabs.sendMessage(activeTab.id, { action: "performMagic" });
+        await new Promise((resolve) => setTimeout(resolve, 13000));   
+    
+      
     }
+
   }
 };
 
