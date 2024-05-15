@@ -1,7 +1,7 @@
 {
   "name": "Tradier Pro",
-  "version": "0.2.0",
-  "description": "Tradier.com Bot",
+  "version": "0.2.3",
+  "description": "Copy Trading Bot for Tradier.com Developed by GitHub.com/KumiTahaA",
   "permissions": ["storage", "tabs","webNavigation"],
   "host_permissions": ["https://*.tradier.com/*"],
   "background": {

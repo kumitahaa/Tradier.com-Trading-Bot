@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const activeTab = await getActiveTabURL();
   const url = activeTab.url;
   const bookmarkElement = document.getElementById("bookmark");
+  const stopElement = document.getElementById("stopProcess");
   if (!url.includes("tradier.com")) {
     bookmarkElement.innerHTML = "<h1>Go to Tradier.com</h1>";
   }
@@ -9,7 +10,8 @@ document.addEventListener("DOMContentLoaded", async () => {
           .get(["p"])
           .then(async(data) => {
             if (data.p === "Process is running") {
-              bookmarkElement.innerHTML ="<h1>Process is running <br/>_____________<br/><br/>To Stop The Process, Refresh Tab</h1>";
+              bookmarkElement.style.display = "none";
+              stopElement.style.display = "block";
             }});
 
   document.getElementById("getdata")?.addEventListener("click", async () => {
@@ -19,7 +21,9 @@ document.addEventListener("DOMContentLoaded", async () => {
   try {
     await chrome.tabs.sendMessage(activeTab.id, { action: "getData" });
   } catch {
-    bookmarkElement.innerHTML = "<h1>Please Refresh Web Page</h1>";
+    chrome.runtime.sendMessage({action: "stopProcess"}, function(response) {
+      console.log(response);
+    });
   }
 
   await chrome.storage.sync
@@ -30,13 +34,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const content = [
         "Stock",
         "Action",
-        "duration",
+        "Duration",
         "Limit Value",
         "Order Type",
-        "Quantity",
         "Trade Stop Value",
-        "Duration",
-        
+        "Quantity",
+        // "duration",
         
       ];
 
@@ -98,7 +101,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       
           // Update innerHTML for "OrderType" with styles
           document.getElementById(idsArray[i]).innerHTML = await `<span style="color: yellow;">${label} :</span> <span style="color: black;">${orderTypeText}</span>`;
-        } else if (label === "Duration") {
+        } else if (label === "duration") {
           let durationText = "";
       
           // Apply conditions for different duration values
@@ -143,6 +146,7 @@ document.addEventListener("DOMContentLoaded", async () => {
               "<h1>Data is not Set on Dashboard</h1>";
           }
           await chrome.storage.sync.clear(function () {
+            
             console.log("Data cleared from Chrome Sync Storage");
           });
         })
@@ -155,15 +159,37 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   document
     .getElementById("startprocess")?.addEventListener("click", async () => {
-      document.getElementById("showdata").style.display = "none";
-      bookmarkElement.innerHTML ="<h1>Process is running <br/>________<br/>To Stop The Process, Refresh Tab</h1>";
+        bookmarkElement.style.display = "none";
+        stopElement.style.display = "block";
       try{
-        const activeTab = await getActiveTabURL();
-        await chrome.tabs.sendMessage(activeTab.id, { action: "executeFunction" });
+        chrome.runtime.sendMessage({action: "startprocess"}, function(response) {
+          console.log(response);
+        });
       }catch{
-        bookmarkElement.innerHTML = "<h1>Please Refresh Web Page</h1>"
+        chrome.runtime.sendMessage({action: "stopProcess"}, function(response) {
+          console.log(response);
+        });
       }
     });
+
+
+    document
+    .getElementById("stopProcess")?.addEventListener("click", async () => {
+      bookmarkElement.style.display = "block";
+      stopElement.style.display = "none";
+      try{
+        chrome.runtime.sendMessage({action: "stopProcess"}, function(response) {
+          console.log(response);
+        });
+      }catch{
+        chrome.runtime.sendMessage({action: "stopProcess"}, function(response) {
+          console.log(response);
+        });
+      }
+    });
+
+
+
   });
 
   

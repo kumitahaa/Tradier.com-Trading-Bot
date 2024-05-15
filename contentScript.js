@@ -47,11 +47,13 @@ try{
     const tradeStopValue = tradeStopTag.value;
     data.tradeStopValue = tradeStopValue;
   }
+
+  data.totalTradesApplied = 0;
   await chrome.storage.sync.set({data}).then(() => {
     console.log("Value is set");
   }).catch((e)=>{confirm.log(e)});
 }catch{
-  await chrome.storage.sync.set({e:"Unalbe to set values"}).then(() => {
+  await chrome.storage.sync.set({e:"Unable to set values"}).then(() => {
     console.log("Error is set");
   }).catch((e)=>{confirm.log(e)});
 }
@@ -61,125 +63,219 @@ const performMagic = async () => {
   var data = {};
   await chrome.storage.sync.get(["data"]).then((result) => {
     data = result.data;
+    data.totalTradesApplied = (data.totalTradesApplied || 0) + 1;
   });
+
 
   const changeEvent = new Event("change");
   var clickEvent = new Event("click");
 
   await chrome.storage.sync.set({ p: "Process is running" }).then(() => {
     console.log("Process is running");
+    console.log("Current Account is: " + data.totalTradesApplied)
   });
 
-  // Start the loop to iterate through the dropdown items
-  for (var i = 0; i < 30; i++) {
-    console.log("Loop circle");
 
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+  await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // Open the Trade form if it's not already open
-    const tradeForm = document.getElementsByName("quantity")[0];
-    if (!tradeForm) {
-      const toggleButton = document.querySelector(
-        'button[data-automation="toggle_trade_ticket_button"]'
-      );
-      toggleButton.click();
+    var tradeTicket = document.querySelector('[data-automation="trade_ticket"]');
+    if (!tradeTicket){
+        // If not visible, perform actions to toggle it
+        console.log('Trade ticket is not visible on the page, toggling it...');
+        var toggleButton = document.querySelector('button[data-automation="toggle_trade_ticket_button"]');
+        if (toggleButton) {
+            toggleButton.click();
+            console.log('Trade ticket toggled');
+            await new Promise((resolve) => setTimeout(resolve, 1000));
+            tradeTicket = document.querySelector('[data-automation="trade_ticket"]');
+        } else {
+            console.log('Toggle button not found');
+        }
     }
+    // Check if the trade ticket element is visible
+    if (tradeTicket && tradeTicket.offsetHeight > 0) {
+        // If visible, perform desired actions here
+        console.log('Trade ticket is visible on the page');
+    
 
     // Set stock value
     const allInputs = document.getElementsByName("trade_module_symbol_search");
     const stockInputTag = allInputs[0];
-    stockInputTag.value = data.StackValue.toString();
+
+    // To Simulate key press in Symbol field
+    const typeStockInput = (stockInputTag, text) => {
+      // stockInputTag.dispatchEvent(new Event('focus'));
+      stockInputTag.value = text;
+      stockInputTag.dispatchEvent(new Event('input', { bubbles: true }));
+      stockInputTag.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    typeStockInput(stockInputTag, data.StackValue.toString());
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // Press Search button to get the Symbol
+    const searchButton = document.getElementsByClassName("button-outline muted icon-only rounded-l-none rounded-r-md border-l-0 px-4 py-2")[0]
+    searchButton.click()
+
     await new Promise((resolve) => setTimeout(resolve, 1000));
 
-    // ============================== Select Next Account =====================================
-    const dropdownButton = document.getElementById("headlessui-menu-button-5");
-    // If the dropdown button is not found, exit
-    if (!dropdownButton) {
-      alert("Dropdown button not found.");
-      break;
-    } else {
-      dropdownButton.dispatchEvent(new MouseEvent("click"));
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
-      // Get the selected item
-      const selectedItem = document.querySelector("button.bg-gray-200");
-      if (!selectedItem) {
-        console.log("Selected item not found.");
-        break;
-      }
-      console.log("Selected item:", selectedItem.innerText);
-      if (selectedItem.innerText === "AH-21") {
-        console.log("Last item reached: AH-21");
-        break;
-      }
-      const nextItem = selectedItem.nextElementSibling;
-      if (nextItem) {
-        nextItem.click();
-      } else {
-        console.log("Next item not found.");
-        break;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-    }
-
-    
+     // ============================== Add Values and Submit =====================================
     // set index of selected action
     const actionTag = document.getElementsByName("side")[0];
     actionTag.selectedIndex = data.actionIndex;
     actionTag.dispatchEvent(changeEvent);
     await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // set Trade Quantity
     const tradeQuantityInputElement = document.getElementsByName("quantity")[0];
-    tradeQuantityInputElement.value = data.tradeQuantity;
-    tradeQuantityInputElement.dispatchEvent(changeEvent);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      //  Simulate Key Press for Quantity
+    const typeQuantity = (tradeQuantityInputElement, text) => {
+      tradeQuantityInputElement.dispatchEvent(new Event('focus'));
+      tradeQuantityInputElement.value = text;
+      tradeQuantityInputElement.dispatchEvent(new Event('input', { bubbles: true }));
+      tradeQuantityInputElement.dispatchEvent(new Event('change', { bubbles: true }));
+    };
+
+    typeQuantity(tradeQuantityInputElement, data.tradeQuantity.toString());
+
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const orderType = document.getElementsByName("type")[0];
     orderType.selectedIndex = data.orderTradeIndex;
     orderType.dispatchEvent(changeEvent);
-    await new Promise((resolve) => setTimeout(resolve, 1500));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     if (data.limitValue !== "not selected") {
       const limitTag = document.getElementsByName("price")[0];
-      limitTag.value = data.limitValue;
-      limitTag.dispatchEvent(changeEvent);
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      //  Simulate Key Press for Trade Limit Price
+
+      const typeLimitPrice = (limitTag, text) => {
+        limitTag.dispatchEvent(new Event('focus'));
+        limitTag.value = text;
+        limitTag.dispatchEvent(new Event('input', { bubbles: true }));
+        limitTag.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+
+      typeLimitPrice(limitTag, data.limitValue.toString());
+
+      // await new Promise((resolve) => setTimeout(resolve, 1000));
     }
 
     if (data.tradeStopValue !== "not selected") {
       const tradeStopTag = document.getElementsByName("stop")[0];
-      tradeStopTag.value = data.tradeStopValue;
-      tradeStopTag.dispatchEvent(changeEvent);
+      
+      //  Simulate Key Press for Trade Stop Price
+      const typeStopPrice = (tradeStopTag, text) => {
+        tradeStopTag.dispatchEvent(new Event('focus'));
+        tradeStopTag.value = text;
+        tradeStopTag.dispatchEvent(new Event('input', { bubbles: true }));
+        tradeStopTag.dispatchEvent(new Event('change', { bubbles: true }));
+      };
+
+      typeStopPrice(tradeStopTag, data.tradeStopValue.toString());
     }
     const tradeDuration = document.getElementsByName("duration")[0];
     tradeDuration.value = data.duration;
     tradeDuration.dispatchEvent(changeEvent);
 
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
     const preview_button = document.querySelector(
       'button[data-automation="trade_preview_button"]'
     );
-    preview_button.dispatchEvent(clickEvent);
-    preview_button.click();
-    await new Promise((resolve) => setTimeout(resolve, 3000));
+  
+    if(preview_button){
+      preview_button.dispatchEvent(clickEvent);
+      preview_button.click();
+    }
+    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     try {
       const order_buttons = document.querySelector(
         'button[data-automation="trade_submit_button"]'
       );
+      
+      await chrome.storage.sync.set({ data })
+      console.log("Counter Updated");
+
       order_buttons.dispatchEvent(clickEvent);
       order_buttons.click();
+      console.log("=== Order Placed ===")
+      
+    
+    
+    await new Promise((resolve) => setTimeout(resolve, 1500));   
+    
+    
+      // ============================== Select Next Account =====================================
+    var dropdownButton = document.getElementById("headlessui-menu-button-5");
+    // If the dropdown button is not found, exit
+    if (!dropdownButton) {
+      console.log("We can't find the dropDown. Traded: " + data.totalTradesApplied + " accounts.")
+      await new Promise((resolve) => setTimeout(resolve, 2000));   
+      dropdownButton = document.getElementById("headlessui-menu-button-5");
+
+    } 
+    if (dropdownButton) {
+      dropdownButton.dispatchEvent(new MouseEvent("click"));
+
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
+      // Get the selected item
+      var selectedItem = document.querySelector("button.bg-gray-200");
+      if (!selectedItem) {
+        console.log("Selected item not found.");
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        selectedItem = document.querySelector("button.bg-gray-200");
+      }
+      if(selectedItem){
+      console.log("Selected item:", selectedItem.innerText);
+    
+      const nextItem = selectedItem.nextElementSibling;
+      if (nextItem) {
+        nextItem.click();
+        await new Promise((resolve) => setTimeout(resolve, 2500));   
+
+      } else {
+        // console.log("");
+        await chrome.storage.sync.clear(function() {
+          console.log("Next item not found. Traded: " + data.totalTradesApplied + " accounts.")
+          stop();
+        alert("Next item not found. Traded: " + data.totalTradesApplied + " accounts.")
+        // document.getElementById("stopprocess").click()
+        })
+        
+      }
+    }
+    }
+
     } catch {
       console.log("Error occurred while clicking submit button.");
     }
+    
+  } else {
+    if (!tradeTicket){
+    // If not visible, perform actions to toggle it
+    console.log('Trade ticket is not visible on the page, toggling it...');
+    toggleButton = document.querySelector('button[data-automation="toggle_trade_ticket_button"]');
+    if (toggleButton) {
+        toggleButton.click();
+        console.log('Trade ticket toggled');
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+    } else {
+        console.log('Toggle button not found');
+    }
+}
   }
+
+
 };
 
 
 
 chrome.runtime.onMessage.addListener(async(message, sender, sendResponse) => {
-  if (message.action === 'executeFunction') {
+  if (message.action === 'performMagic') {
     // Execute the function when the message is received
     await performMagic();
   }
@@ -188,4 +284,13 @@ chrome.runtime.onMessage.addListener(async(message, sender, sendResponse) => {
     await getData();
     }
 });
+
+
+function stop(){
+  chrome.runtime.sendMessage({action: "stopProcess"}, function(response) {
+    console.log(response);
+    
+  });
+}
+
 })();

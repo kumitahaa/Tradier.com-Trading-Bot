@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,10 +7,11 @@
     <title>Document</title>
   </head>
   <body>
-    <div class="container">
-      <div>
+    <div class="title">Tradier Pro</div>
+    <div class="container" >
+      <div id="container">
         <div class="bookmark" id="bookmark">
-          <div class="title">Tradier Pro</div>
+          
           <button id="getdata">Fetch</button>
           <div id="showdata">
             <div id="StackValue" class="subtitle">Selcted option here</div>
@@ -23,8 +23,16 @@
             <div id="duration" class="subtitle">Selcted option here</div>
           </div>
           <button id="startprocess">Do It</button>
-        </div>
+          
+        </div>   
+
+        <div id="stopProcess" style="display: none;">
+          <h1>Process is running...</h1><br><br>
+          <button id='stopprocess'>Stop Process</button>
+        </div>   
+
       </div>
+      
     </div>
     <script type="module" src="popup.js"></script>
   </body>
