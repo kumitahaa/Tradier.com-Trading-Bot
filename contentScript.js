@@ -220,7 +220,7 @@ const performMagic = async () => {
   }
     
       // ============================== Select Next Account =====================================
-    var dropdownButton = document.getElementById("headlessui-menu-button-5");
+    var dropdownButton = document.getElementById("headlessui-menu-button-3");
     // If the dropdown button is not found, exit
     if (!dropdownButton) {
       console.log("We can't find the dropDown. Traded: " + data.totalTradesApplied + " accounts.")
@@ -230,7 +230,6 @@ const performMagic = async () => {
     }
     if (dropdownButton) {
       dropdownButton.dispatchEvent(new MouseEvent("click"));
-
       await sleep(1000)
 
       // Get the selected item
